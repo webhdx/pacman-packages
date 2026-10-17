@@ -1,0 +1,64 @@
+name: Packages
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run_build]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: packages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build pacman packages
+    runs-on: ubuntu-latest
+    container: webhdx/devkitppc-libogc2:latest
+
+    steps:
+      - name: Install prerequisites
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends fakeroot zstd
+          dkp-pacman -Syu --noconfirm
+          # Conflicts with libogc2-cmake
+          dkp-pacman -Rdd --noconfirm ogc-cmake
+
+      - name: Clone project
+        uses: actions/checkout@v6
+
+      - name: Build packages
+        run: ./build.sh
+
+      - name: Create repository
+        run: ./make_repo.sh
+
+      - name: Upload repository
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+
+  deploy:
+    name: Publish repository with GitHub Pages
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

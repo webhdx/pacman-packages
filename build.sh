@@ -1,6 +1,7 @@
 #!/bin/bash
 # Build every package into out/.
 # Runs as root inside webhdx/devkitppc-libogc2; makepkg itself runs as the unprivileged "builder" user.
+# Build-then-install approach adapted from BlocksDS: https://github.com/blocksds/packages
 set -e
 cd "$(dirname "$0")"
 

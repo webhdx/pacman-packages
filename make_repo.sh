@@ -1,5 +1,6 @@
 #!/bin/bash
 # Create the pacman repository in public/ from the packages in out/.
+# Adapted from the BlocksDS: https://github.com/blocksds/packages
 set -e
 cd "$(dirname "$0")"
 

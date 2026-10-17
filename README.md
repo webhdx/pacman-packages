@@ -5,15 +5,28 @@ devkitPro cannot, and will not, provide support for these packages.
 
 ## Adding repository
 
-Append to `/opt/devkitpro/pacman/etc/pacman.conf`, after the `[libogc2-devkitpro]` (or `[extremscorner-devkitpro]`) section:
+You must first import the GPG key and locally sign it.
+
+```
+sudo dkp-pacman-key --recv-keys 39F617B9EF0FE021F027D9DC00A759785C24BCCF --keyserver keyserver.ubuntu.com
+sudo dkp-pacman-key --lsign-key 39F617B9EF0FE021F027D9DC00A759785C24BCCF
+```
+
+The key is also published with the repository, as an alternative to the keyserver:
+
+```
+curl -fsSL https://webhdx.github.io/pacman-packages/webhdx-devkitpro.asc | sudo dkp-pacman-key --add -
+sudo dkp-pacman-key --lsign-key 39F617B9EF0FE021F027D9DC00A759785C24BCCF
+```
+
+Then append to `/opt/devkitpro/pacman/etc/pacman.conf`, after the `[libogc2-devkitpro]` (or `[extremscorner-devkitpro]`) section:
 
 ```ini
 [webhdx-devkitpro]
-SigLevel = Optional TrustAll
 Server = https://webhdx.github.io/pacman-packages
 ```
 
-Packages are not signed, hence `SigLevel = Optional TrustAll`. Then install packages as usual:
+Install packages as usual:
 
 ```
 sudo dkp-pacman -Sy libogc2-libdvm-ideexi-git

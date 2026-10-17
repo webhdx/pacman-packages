@@ -11,12 +11,26 @@ mkdir public
 cp out/*.pkg.tar.zst public/
 cd public
 
-dkp-repo-add "$repo.db.tar.gz" *.pkg.tar.zst
+# Sign packages and database when GPGKEY is set
+sign=()
+if [ -n "$GPGKEY" ]; then
+	for pkg in *.pkg.tar.zst; do
+		gpg --batch --yes --detach-sign --no-armor --local-user "$GPGKEY" "$pkg"
+	done
+	gpg --batch --yes --armor --export "$GPGKEY" > "$repo.asc"
+	sign=(--sign --key "$GPGKEY")
+fi
+
+dkp-repo-add "${sign[@]}" "$repo.db.tar.gz" *.pkg.tar.zst
 
 # GitHub Pages does not serve symlinks
 for f in db files; do
 	rm "$repo.$f"
 	cp "$repo.$f.tar.gz" "$repo.$f"
+	if [ -n "$GPGKEY" ]; then
+		rm "$repo.$f.sig"
+		cp "$repo.$f.tar.gz.sig" "$repo.$f.sig"
+	fi
 done
 
 files=(*)
